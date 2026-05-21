@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # MongoDB Service
+  mongodb:
+    image: mongo:latest
+    container_name: mern-mongodb
+    restart: always
+    ports:
+      - "27017:27017" # Expose for local Compass/GUI database access if needed
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - mern-network
+
+  # Node.js Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mern-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/projectmanagement
+      - JWT_SECRET=your_docker_compose_super_secret_key_change_me_in_production
+      - PORT=5000
+      - FRONTEND_URL=http://localhost
+    depends_on:
+      - mongodb
+    networks:
+      - mern-network
+
+  # React Frontend Service served via Nginx
+  frontend:
+    build:
+      context: ./client-side/react-project
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:5000
+    container_name: mern-frontend
+    restart: always
+    ports:
+      - "80:80" # Map host port 80 to container Nginx port 80
+    depends_on:
+      - backend
+    networks:
+      - mern-network
+
+volumes:
+  mongo-data:
+
+networks:
+  mern-network:
+    driver: bridge

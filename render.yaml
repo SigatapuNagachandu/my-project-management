@@ -1,0 +1,23 @@
+services:
+  # Deploy backend as a Web Service on Render
+  - type: web
+    name: project-management-backend
+    env: node
+    plan: free # Render free tier
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+      # MONGO_URI needs to be provided by the user in the Render UI (e.g. from MongoDB Atlas)
+      - key: MONGO_URI
+        sync: false
+      # JWT_SECRET will be automatically generated with a secure random value by Render
+      - key: JWT_SECRET
+        generateValue: true
+      # FRONTEND_URL is set to '*' by default to allow easy dynamic connection, or specify your hosted frontend URL
+      - key: FRONTEND_URL
+        value: "*"
